@@ -45,13 +45,48 @@ def cleanData():
         if df[col].isnull().sum() > 0:
             df[col] = df[col].fillna(df[col].mode()[0])
 
-    #clean 
+    # clean ram
     df['Ram_GB'] = df['Ram'].str.replace('GB','').astype(int)
-
+    # clean weight
     df['Weight_kg'] = df['Weight'].str.replace('kg','').astype(float)
+    
+    # clean memory
+    def memory_parse(memory_str):
+        total = 0
+        parts = memory_str.split('+')
+
+        for part in parts:
+            part = part.strip()
+
+            if 'TB' in part:
+                num = float(part.split('TB')[0])
+                total += num*1024 #Convert ke GB
+
+            elif 'GB' in part:
+                num = float(part.split('GB')[0])
+                total += num
+
+        return total
+
+    df['Storage_GB'] = df['Memory'].apply(memory_parse)
+
+    # clean GPU
+    def get_gpu_brand(gpu):
+        if 'Nvidia' in gpu :
+            return 'Nvidia'
+        elif 'AMD' in gpu:
+            return 'AMD'
+        else:
+            return 'Intel'
+
+    df['Gpu_Brand'] = df['Gpu'].apply(get_gpu_brand)
+
+    # convert price to idr
+    EUR_TO_IDR = 20336.62
+    df['Price_IDR'] = (df['Price_euros'] * EUR_TO_IDR).round(0).astype(int)
 
     
-    df.to_csv('/opt/airflow/dags/laptops_data_raw.csv', index=False)
+    df.to_csv('/opt/airflow/dags/laptops_data_clean.csv', index=False)
     
 
 
