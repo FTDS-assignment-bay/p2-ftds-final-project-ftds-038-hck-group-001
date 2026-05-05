@@ -8,9 +8,9 @@ from airflow.operators.python_operator import PythonOperator
 default_args = {
     'owner'           : 'SpecMatch',
     'depends_on_past' : False,
-    'start_date'      : dt(2024, 11, 1),
+    'start_date'      : dt.datetime(2026, 5, 1),
     'retries'         : 1,
-    'retry_delay'     : dt(minutes=5),
+    'retry_delay'     : dt.timedelta(minutes=5),
 }
 
 def fetchData():
@@ -33,7 +33,8 @@ def fetchData():
 
 def cleanData():
     df = pd.read_csv('/opt/airflow/dags/laptops_data_raw.csv')
-    df.drop_duplicates()
+    df.columns = df.columns.str.strip().str.lower()
+    df = df.drop_duplicates()
     # Miss values
     num_cols = df.select_dtypes(include=['int64', 'float64']).columns
     cat_cols = df.select_dtypes(include=['object',]).columns
@@ -46,9 +47,9 @@ def cleanData():
             df[col] = df[col].fillna(df[col].mode()[0])
 
     # clean ram
-    df['Ram_GB'] = df['Ram'].str.replace('GB','').astype(int)
+    df['ram_gb'] = df['ram'].str.replace('GB','').astype(int)
     # clean weight
-    df['Weight_kg'] = df['Weight'].str.replace('kg','').astype(float)
+    df['weight_kg'] = df['weight'].str.replace('kg','').astype(float)
     
     # clean memory
     def memory_parse(memory_str):
@@ -68,7 +69,7 @@ def cleanData():
 
         return total
 
-    df['Storage_GB'] = df['Memory'].apply(memory_parse)
+    df['storage_gb'] = df['memory'].apply(memory_parse)
 
     # clean GPU
     def get_gpu_brand(gpu):
@@ -79,13 +80,11 @@ def cleanData():
         else:
             return 'Intel'
 
-    df['Gpu_Brand'] = df['Gpu'].apply(get_gpu_brand)
+    df['gpu_brand'] = df['gpu'].apply(get_gpu_brand)
 
     # convert price to idr
     EUR_TO_IDR = 20336.62
-    df['Price_IDR'] = (df['Price_euros'] * EUR_TO_IDR).round(0).astype(int)
-
-    
+    df['price_idr'] = (df['price_euros'] * EUR_TO_IDR).round(0).astype(int)
     df.to_csv('/opt/airflow/dags/laptops_data_clean.csv', index=False)
     
 
