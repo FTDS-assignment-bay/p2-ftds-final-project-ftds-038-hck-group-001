@@ -39,7 +39,7 @@ services:
   scheduler:
     <<: [*common, *depends-on]
     # <<: *depends-on
-    container_name: airflow-scheduler
+    container_name: airflow-scheduler_final_project
     command: scheduler
     restart: on-failure
     ports:
@@ -49,7 +49,7 @@ services:
     <<: [*common, *depends-on]
     # <<: *common
     # <<: *depends-on
-    container_name: airflow-webserver
+    container_name: airflow-webserver_final_project
     restart: always
     command: webserver
     ports:
@@ -62,7 +62,7 @@ services:
   
   airflow-init:
     <<: *common
-    container_name: airflow-init
+    container_name: airflow-init_final_project
     entrypoint: /bin/bash
     command:
       - -c
