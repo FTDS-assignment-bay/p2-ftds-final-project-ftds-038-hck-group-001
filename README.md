@@ -32,7 +32,10 @@ Sumber Dataset : [Laptop Price — Kaggle](https://www.kaggle.com/datasets/muham
 | Weight | Berat laptop |
 | Price_euros | Harga laptop dalam Euro |  
 
-## Metode  
+## 🧠 Metode  
+* Content-Based Filtering
+* Cosine Similarity
+* ETL pipeline
 
 
 ## 🛠️ Tech Stack 
